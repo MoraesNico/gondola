@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MoraesNico/gondola/specs/001-gondola-whisky-3d/contracts/whiskies.schema.json",
+  "title": "Catálogo da gôndola de whisky",
+  "type": "object",
+  "required": ["expositor", "produtos"],
+  "properties": {
+    "expositor": {
+      "type": "object",
+      "required": ["nome", "categoria"],
+      "properties": {
+        "nome": { "type": "string", "minLength": 1 },
+        "categoria": { "type": "string", "minLength": 1 },
+        "moeda": { "type": "string", "pattern": "^[A-Z]{3}$", "default": "BRL" },
+        "atualizadoEm": { "type": "string", "format": "date" }
+      }
+    },
+    "produtos": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/produto" }
+    }
+  },
+  "$defs": {
+    "hex": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "produto": {
+      "type": "object",
+      "required": ["id", "nome", "descricao", "preco", "teorAlcoolico", "disponivel"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "ordem": { "type": "integer", "minimum": 1 },
+        "nome": { "type": "string", "minLength": 1 },
+        "marca": { "type": "string" },
+        "tipo": { "type": "string" },
+        "pais": { "type": "string" },
+        "regiao": { "type": "string" },
+        "idade": { "type": "string" },
+        "volumeMl": { "type": "integer", "exclusiveMinimum": 0 },
+        "teorAlcoolico": { "type": "number", "minimum": 0, "maximum": 100 },
+        "preco": { "type": "number", "minimum": 0 },
+        "descricao": { "type": "string", "minLength": 1 },
+        "notas": { "type": "array", "items": { "type": "string" } },
+        "harmonizacao": { "type": "array", "items": { "type": "string" } },
+        "disponivel": { "type": "boolean", "description": "false = produto em falta; não ocupa prateleira" },
+        "garrafa": {
+          "type": "object",
+          "properties": {
+            "formato": { "enum": ["redonda", "quadrada", "frasco", "facetada"] },
+            "altura": { "type": "number", "minimum": 0.18, "maximum": 0.36 },
+            "largura": { "type": "number", "minimum": 0.06, "maximum": 0.12 },
+            "profundidade": { "type": "number", "minimum": 0.03, "maximum": 0.12 },
+            "ombro": { "enum": ["alto", "medio", "baixo"] },
+            "corVidro": { "$ref": "#/$defs/hex" },
+            "corLiquido": { "$ref": "#/$defs/hex" },
+            "corRotulo": { "$ref": "#/$defs/hex" },
+            "corTextoRotulo": { "$ref": "#/$defs/hex" },
+            "corTampa": { "$ref": "#/$defs/hex" },
+            "inclinacaoRotulo": { "type": "number", "minimum": -45, "maximum": 45 }
+          }
+        }
+      }
+    }
+  }
+}
