@@ -1,0 +1,17 @@
+{
+  "name": "gondola-whisky-3d",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gôndola 3D fotorrealista de whiskies em three.js com painel de catálogo e arranjo automático das prateleiras.",
+  "scripts": {
+    "start": "python serve.py",
+    "test": "node --test && python -m unittest discover -s tests -p \"test_*.py\"",
+    "smoke": "node tests/smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

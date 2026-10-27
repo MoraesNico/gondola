@@ -28,5 +28,5 @@ python serve.py --port 9000 --no-browser
 ```bash
 node --test                      # catálogo + arranjo
 python -m unittest discover -s tests -p "test_*.py"   # servidor
-node tests/smoke.mjs            # opcional: requer Playwright; gera screenshots/
+node tests/smoke.mjs            # opcional: requer Playwright; gera docs/screenshots/
 ```

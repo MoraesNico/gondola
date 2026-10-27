@@ -1,0 +1,57 @@
+{
+  "source": "https://polyhaven.com",
+  "license": "CC0",
+  "textures": {
+    "lacquered_cherry_wood": {
+      "use": "tampo das prateleiras e laterais",
+      "res": "2k",
+      "maps": {
+        "diff": "diff.jpg",
+        "nor_gl": "nor_gl.jpg",
+        "arm": "arm.jpg"
+      }
+    },
+    "black_painted_planks": {
+      "use": "painel de fundo da gôndola (ripado)",
+      "res": "2k",
+      "maps": {
+        "diff": "diff.jpg",
+        "nor_gl": "nor_gl.jpg",
+        "arm": "arm.jpg"
+      }
+    },
+    "marble_01": {
+      "use": "piso da loja",
+      "res": "2k",
+      "maps": {
+        "diff": "diff.jpg",
+        "nor_gl": "nor_gl.jpg",
+        "arm": "arm.jpg"
+      }
+    },
+    "blue_metal_plate": {
+      "use": "colunas, base e cabeçote (normal/roughness com cor grafite)",
+      "res": "1k",
+      "maps": {
+        "diff": "diff.jpg",
+        "nor_gl": "nor_gl.jpg",
+        "arm": "arm.jpg"
+      }
+    },
+    "painted_plaster_wall": {
+      "use": "parede ao fundo",
+      "res": "1k",
+      "maps": {
+        "diff": "diff.jpg",
+        "nor_gl": "nor_gl.jpg",
+        "arm": "arm.jpg"
+      }
+    }
+  },
+  "hdri": {
+    "brown_photostudio_02": {
+      "use": "reflexos e luz ambiente (IBL)",
+      "file": "brown_photostudio_02_1k.hdr"
+    }
+  }
+}

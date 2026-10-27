@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Gôndola 3D · Whisky</title>
+  <meta name="description" content="Gôndola 3D fotorrealista de whiskies com painel de catálogo, disponibilidade e arranjo automático das prateleiras." />
+  <link rel="stylesheet" href="src/ui/styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/build/three.module.js",
+        "three/addons/": "./vendor/three/addons/",
+        "camera-controls": "./vendor/camera-controls/camera-controls.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="stage" aria-label="Vitrine 3D da gôndola">
+    <canvas id="scene" tabindex="0" aria-label="Gôndola de whisky em 3D. Arraste para girar, role para aproximar, clique numa garrafa para ver detalhes."></canvas>
+    <div id="hint" class="hint" hidden>Arraste para girar · role para aproximar · clique numa garrafa</div>
+    <button id="reset-view" class="fab fab-left" type="button" title="Voltar à vista geral">Vista geral</button>
+    <button id="panel-toggle" class="fab fab-right" type="button" aria-controls="panel" aria-expanded="true">Catálogo</button>
+  </main>
+
+  <aside id="panel" class="panel" aria-label="Catálogo de whiskies">
+    <header class="panel-header">
+      <p class="eyebrow" id="panel-category">Bebidas — Whisky</p>
+      <h1 id="panel-title">Gôndola</h1>
+      <p class="summary" id="panel-summary" aria-live="polite"></p>
+      <div class="filters" role="group" aria-label="Filtrar lista">
+        <button type="button" data-filter="todos" aria-pressed="true">Todos</button>
+        <button type="button" data-filter="disponiveis" aria-pressed="false">Disponíveis</button>
+        <button type="button" data-filter="gondola" aria-pressed="false">Na gôndola</button>
+      </div>
+      <button id="restore-all" class="link-button" type="button" disabled>Restaurar prateleiras do JSON</button>
+    </header>
+    <div id="invalid-warning" class="warning" hidden></div>
+    <ul id="product-list" class="product-list"></ul>
+    <footer class="panel-footer">
+      Preços ilustrativos · Texturas <a href="https://polyhaven.com" target="_blank" rel="noopener">Poly Haven</a> (CC0)
+    </footer>
+  </aside>
+
+  <div id="toast" class="toast" role="status" aria-live="assertive" hidden></div>
+
+  <div id="loader" class="overlay">
+    <div class="overlay-card">
+      <div class="spinner" aria-hidden="true"></div>
+      <p id="loader-text">Carregando texturas fotorrealistas…</p>
+      <progress id="loader-progress" max="1" value="0"></progress>
+    </div>
+  </div>
+
+  <div id="error" class="overlay" hidden>
+    <div class="overlay-card">
+      <h2>Não foi possível abrir a gôndola</h2>
+      <p id="error-text"></p>
+      <p class="muted">Dica: rode <code>python serve.py</code> na pasta do projeto e acesse o endereço exibido.</p>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
