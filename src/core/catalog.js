@@ -9,20 +9,24 @@ export class CatalogError extends Error {
 }
 
 export const BOTTLE_SHAPES = ['redonda', 'quadrada', 'frasco', 'facetada'];
-export const SHOULDERS = ['alto', 'medio', 'baixo'];
+export const CLOSURES = ['capsula', 'rolha-vidro'];
+// Posição do ombro (início e fim da curva, em fração da altura) para os nomes legados.
+export const SHOULDERS = { alto: [0.7, 0.8], medio: [0.6, 0.74], baixo: [0.52, 0.7] };
 
 export const BOTTLE_DEFAULTS = Object.freeze({
   formato: 'redonda',
   altura: 0.29,
   largura: 0.082,
-  ombro: 'medio',
+  ombro: SHOULDERS.medio,
+  raioGargalo: 0.0135,
+  fundo: 0.02,
+  tampa: 'capsula',
   corVidro: '#f3f1ea',
   corLiquido: '#a8581c',
   corRotulo: '#efe6d0',
   corTextoRotulo: '#2b2b2b',
-  corTampa: '#1e1e1e',
-  inclinacaoRotulo: 0,
 });
+const CAPSULE_DEFAULT = Object.freeze({ inicio: 0.82, cor: '#1e1e1e', metalica: false });
 
 const ID_RE = /^[a-z0-9-]+$/;
 const HEX_RE = /^#[0-9a-f]{6}$/i;
@@ -30,6 +34,7 @@ const HEX_RE = /^#[0-9a-f]{6}$/i;
 const isNonEmptyString = (v) => typeof v === 'string' && v.trim().length > 0;
 const isFiniteNumber = (v) => typeof v === 'number' && Number.isFinite(v);
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+const hex = (v, fallback) => (typeof v === 'string' && HEX_RE.test(v) ? v : fallback);
 
 // RV-03 — devolve a lista de motivos pelos quais o item não pode entrar no catálogo.
 function validateProduct(p) {
@@ -46,20 +51,51 @@ function validateProduct(p) {
   return motivos;
 }
 
-function normalizeBottle(g = {}) {
-  const b = { ...BOTTLE_DEFAULTS };
-  if (g && typeof g === 'object') {
-    if (BOTTLE_SHAPES.includes(g.formato)) b.formato = g.formato;
-    if (SHOULDERS.includes(g.ombro)) b.ombro = g.ombro;
-    if (isFiniteNumber(g.altura)) b.altura = clamp(g.altura, 0.18, 0.36);
-    if (isFiniteNumber(g.largura)) b.largura = clamp(g.largura, 0.06, 0.12);
-    if (isFiniteNumber(g.inclinacaoRotulo)) b.inclinacaoRotulo = clamp(g.inclinacaoRotulo, -45, 45);
-    for (const key of ['corVidro', 'corLiquido', 'corRotulo', 'corTextoRotulo', 'corTampa']) {
-      if (typeof g[key] === 'string' && HEX_RE.test(g[key])) b[key] = g[key];
-    }
+function normalizeShoulder(v) {
+  if (typeof v === 'string' && SHOULDERS[v]) return [...SHOULDERS[v]];
+  if (Array.isArray(v) && v.length === 2 && v.every(isFiniteNumber)) {
+    const a = clamp(v[0], 0.4, 0.9);
+    const b = clamp(v[1], 0.4, 0.9);
+    if (b > a) return [a, b];
   }
-  b.profundidade = isFiniteNumber(g?.profundidade) ? clamp(g.profundidade, 0.03, 0.12) : b.largura;
+  return [...BOTTLE_DEFAULTS.ombro];
+}
+
+function normalizeBottle(raw) {
+  const g = raw && typeof raw === 'object' ? raw : {};
+  const b = { ...BOTTLE_DEFAULTS };
+  if (BOTTLE_SHAPES.includes(g.formato)) b.formato = g.formato;
+  if (CLOSURES.includes(g.tampa)) b.tampa = g.tampa;
+  if (isFiniteNumber(g.altura)) b.altura = clamp(g.altura, 0.18, 0.36);
+  if (isFiniteNumber(g.largura)) b.largura = clamp(g.largura, 0.06, 0.12);
+  if (isFiniteNumber(g.raioGargalo)) b.raioGargalo = clamp(g.raioGargalo, 0.009, 0.025);
+  if (isFiniteNumber(g.fundo)) b.fundo = clamp(g.fundo, 0.005, 0.12);
+  b.profundidade = isFiniteNumber(g.profundidade) ? clamp(g.profundidade, 0.03, 0.12) : b.largura;
+  b.ombro = normalizeShoulder(g.ombro);
+  for (const key of ['corVidro', 'corLiquido', 'corRotulo', 'corTextoRotulo']) b[key] = hex(g[key], b[key]);
+
+  const c = g.capsula && typeof g.capsula === 'object' ? g.capsula : {};
+  b.capsula = {
+    inicio: isFiniteNumber(c.inicio) ? clamp(c.inicio, 0.6, 0.95) : CAPSULE_DEFAULT.inicio,
+    cor: hex(c.cor, hex(g.corTampa, CAPSULE_DEFAULT.cor)), // corTampa: campo da versão 1
+    metalica: c.metalica === true,
+  };
   return b;
+}
+
+const STYLE_RE = /^[a-z0-9-]+$/;
+
+function normalizeLabel(raw, garrafa) {
+  const r = raw && typeof raw === 'object' ? raw : {};
+  const textos = {};
+  if (r.textos && typeof r.textos === 'object') {
+    for (const [k, v] of Object.entries(r.textos)) if (isNonEmptyString(v)) textos[k] = v;
+  }
+  return {
+    estilo: typeof r.estilo === 'string' && STYLE_RE.test(r.estilo) ? r.estilo : 'generico',
+    destaque: hex(r.destaque, garrafa.corLiquido),
+    textos,
+  };
 }
 
 const strings = (v) => (Array.isArray(v) ? v.filter(isNonEmptyString) : []);
@@ -111,13 +147,17 @@ export function parseCatalog(raw) {
       harmonizacao: strings(p.harmonizacao),
       disponivel: p.disponivel,
       garrafa: normalizeBottle(p.garrafa),
+      rotulo: null,
       _index: index,
     });
   });
 
   // Ordem estável: `ordem`, depois posição original no arquivo.
   produtos.sort((a, b) => a.ordem - b.ordem || a._index - b._index);
-  for (const p of produtos) delete p._index;
+  for (const p of produtos) {
+    p.rotulo = normalizeLabel(raw.produtos[p._index].rotulo, p.garrafa);
+    delete p._index;
+  }
 
   return { expositor, produtos, invalidos };
 }

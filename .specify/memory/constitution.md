@@ -24,20 +24,32 @@ Regras de negócio (validação do catálogo e algoritmo de arranjo das pratelei
 módulos ES puros, sem dependência de three.js nem do DOM, cobertos por testes `node --test`.
 A cena apenas consome o resultado desses módulos.
 
-### V. Performance Consciente
-Seguir as boas práticas de three.js (katopz/best-practices → discoverthreejs tips):
-reutilizar geometrias/materiais, instanciar objetos repetidos (`InstancedMesh`), limitar o
-pixel ratio, não adicionar/remover luzes em tempo de execução (variar intensidade), atualizar
-o shadow map apenas quando a cena muda, e descartar (`dispose`) recursos removidos.
+### V. Performance Consciente (medir antes de otimizar)
+Seguir as boas práticas de three.js (katopz/best-practices e o guia de 100 dicas r186 em
+`docs/referencias/otimizacao-threejs.md`): orçamento de **≤ 100 draw calls por quadro**
+(todos os passes), instanciar/agrupar objetos repetidos (`InstancedMesh`/`BatchedMesh`),
+texturas comprimidas na GPU (KTX2) com fallback, poucas luzes dinâmicas (assar o que for
+estático), sombras só onde o olho percebe e atualizadas sob demanda, pixel ratio ≤ 2 com
+qualidade adaptativa, shaders pré-compilados no carregamento e `dispose` do que sai de cena.
+Toda otimização é registrada com números de `renderer.info` antes/depois.
 Meta: 60 fps em notebook com GPU integrada a 1080p.
+
+### VI. Fidelidade Visual às Referências
+Garrafas e rótulos devem se parecer o máximo possível com os produtos reais, usando as
+fotos de referência fornecidas pelo cliente **apenas como referência** de formato, cor do
+líquido e composição do rótulo — nunca como textura (as fotos são de terceiros e não são
+versionadas; a análise fica em `docs/referencias/rotulos.md`). Rótulos são redesenhados proceduralmente
+(canvas) com tipografia, cores, hierarquia e emblemas simplificados equivalentes.
 
 ## Restrições Adicionais
 
-- Stack: HTML + CSS + JavaScript (ES2022 modules), three.js r186, camera-controls e lil-gui.
+- Stack: HTML + CSS + JavaScript (ES2022 modules), three.js r186 (`WebGLRenderer`), camera-controls e lil-gui.
 - Servidor: Python 3.9+ apenas com biblioteca padrão.
 - Idioma da interface e da documentação: Português (Brasil).
-- Marcas são representadas apenas por texto nos rótulos gerados proceduralmente; nenhum
-  logotipo ou arte oficial é copiado. Preços são ilustrativos.
+- Rótulos são recriações procedurais inspiradas na identidade visual real (projeto
+  acadêmico, sem fins comerciais); fotos de produto não são embutidas como textura.
+  Marcas pertencem aos seus donos. Preços são ilustrativos.
+- Fontes de terceiros apenas com licença livre (SIL OFL), versionadas em `assets/fonts/`.
 - Lista de produtos é fixa nesta versão: a UI não adiciona nem remove itens do JSON, apenas
   remove/repõe prateleiras na sessão.
 
@@ -52,7 +64,10 @@ Meta: 60 fps em notebook com GPU integrada a 1080p.
 
 Esta constituição prevalece sobre preferências individuais de implementação. Emendas exigem
 atualizar este arquivo, incrementar a versão e registrar o motivo no commit. Toda revisão
-verifica aderência aos princípios I–V; complexidade extra deve ser justificada no
+verifica aderência aos princípios I–VI; complexidade extra deve ser justificada no
 `plan.md` (seção Complexity Tracking).
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-10-27
+**Version**: 1.1.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-10-29
+
+<!-- 1.1.0: princípio VI (fidelidade às referências), V reforçado com orçamento de draw calls
+     e KTX2; restrição de marcas ajustada para recriação procedural; fontes OFL. -->

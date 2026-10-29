@@ -89,3 +89,38 @@ cerejeira laqueada, ripado preto, aço grafite e mármore vêm do Poly Haven; LE
 | 3 | 1,6 M triângulos/quadro | anéis só onde há curvatura; trilho + mãos-francesas fundidos (660 k) |
 | 4 | `PCFSoftShadowMap` removido no r186 | `PCFShadowMap` + `shadow.radius` (amostragem Vogel) |
 | 5 | Vidro transmissivo não mostra líquido transmissivo | líquido opaco brilhante dentro do vidro |
+
+---
+
+## Iteração 2 — otimização, rótulos fiéis e nova estética
+
+### Prompt do cliente
+
+> Atualização focada em otimização e semelhança dos reais rótulos; mudar a estética dos menus
+> para brutalismo mantendo sofisticação, com fontes e cores diferentes e iluminação quente.
+> Referências: guia de 100 dicas de otimização three.js (r186) e fotos das 10 garrafas
+> (`exploit.md`: usar só como referência de cor do líquido, formato e rótulo — não como textura).
+
+| Técnica | Como foi aplicada |
+|---|---|
+| **Persona** | IA como engenheira gráfica three.js + designer de embalagem/UI |
+| **Contexto** | guia de otimização ([docs/referencias/otimizacao-threejs.md](referencias/otimizacao-threejs.md)) e fotos analisadas em [docs/referencias/rotulos.md](referencias/rotulos.md) |
+| **Restrições de saída** | fotos só como referência; ≤ 100 draw calls; fontes livres e locais; continuar sem build |
+| **Iteração** | ver tabela abaixo |
+
+Spec Kit: [specs/002-otimizacao-rotulos-country/](../specs/002-otimizacao-rotulos-country/) e
+constituição emendada para a v1.1.0 (princípio VI — fidelidade às referências).
+
+### Iterações aplicadas no código
+
+| Iteração | Problema | Ajuste |
+|---|---|---|
+| 6 | 277 draw calls por quadro | 2 `BatchedMesh` para todas as garrafas + `InstancedMesh` na estrutura → 31 |
+| 7 | 10 RectAreaLight avaliadas em todo pixel | LEDs assados (lightmap nos tampos + retroiluminação emissiva no fundo); RectAreaLight vira modo opcional |
+| 8 | JPG descomprimido na GPU (261 MiB) | KTX2: ETC1S para cor e ARM, UASTC + RDO para normal |
+| 9 | KTX-Software indisponível no ambiente | encoder `ktx2-encoder` (basis_universal em WASM) via Node |
+| 10 | líquido opaco parecia suco de laranja | o próprio vidro transmissivo tingido por vértice: o fundo aparece através do âmbar |
+| 11 | papel creme detectado como foil dourado (rótulos escuros) | limite de saturação que cresce com a luminosidade |
+| 12 | textos cortados nas laterais curvas | textos principais limitados à faixa frontal visível (±35–45°) |
+| 13 | garrafas escuras contra o ripado preto | retroiluminação âmbar emissiva atrás de cada prateleira |
+| 14 | cliente revisou a estética: "country sem ser estereotipado, sóbrio e executivo" | brutalismo descartado; couro, linho, verde-floresta e latão, Cormorant Garamond + Libre Franklin + Zilla Slab, sem ícones de faroeste |

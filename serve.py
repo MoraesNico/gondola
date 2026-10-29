@@ -37,16 +37,27 @@ MIME_TYPES = {
     ".png": "image/png",
     ".svg": "image/svg+xml",
     ".wasm": "application/wasm",
+    ".ktx2": "image/ktx2",
+    ".woff2": "font/woff2",
     ".md": "text/markdown; charset=utf-8",
 }
+
+
+def cache_policy(url_path: str) -> str:
+    """Catálogo, código e página nunca vêm do cache: editar data/whiskies.json e recarregar
+    mostra o novo arranjo na hora. Texturas, fontes e bibliotecas (pesadas e estáveis) usam
+    revalidação: o navegador guarda e pergunta se mudou (resposta 304, sem baixar de novo)."""
+    path = url_path.split("?", 1)[0]
+    if path.startswith(("/assets/", "/vendor/")):
+        return "no-cache"
+    return "no-store"
 
 
 class GondolaHandler(http.server.SimpleHTTPRequestHandler):
     extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map, **MIME_TYPES}
 
     def end_headers(self) -> None:
-        # Sem cache: editar data/whiskies.json e recarregar a página mostra o novo arranjo.
-        self.send_header("Cache-Control", "no-store")
+        self.send_header("Cache-Control", cache_policy(self.path))
         super().end_headers()
 
     def log_message(self, format: str, *args) -> None:  # noqa: A002 - assinatura da stdlib

@@ -3,7 +3,7 @@
     "nome": "Gôndola Destilados Premium",
     "categoria": "Bebidas — Whisky",
     "moeda": "BRL",
-    "atualizadoEm": "2026-10-27"
+    "atualizadoEm": "2026-10-29"
   },
   "produtos": [
     {
@@ -19,19 +19,41 @@
       "teorAlcoolico": 45,
       "preco": 279.9,
       "descricao": "Bourbon da destilaria mais antiga em operação contínua dos EUA. Receita com alto teor de milho, envelhecido em barris novos de carvalho americano tostados, resultando em um perfil doce, equilibrado e muito versátil.",
-      "notas": ["baunilha", "caramelo", "toffee", "menta", "melaço"],
-      "harmonizacao": ["costela defumada", "torta de nozes-pecã", "chocolate ao leite", "Old Fashioned"],
+      "notas": [
+        "baunilha",
+        "caramelo",
+        "toffee",
+        "menta",
+        "melaço"
+      ],
+      "harmonizacao": [
+        "costela defumada",
+        "torta de nozes-pecã",
+        "chocolate ao leite",
+        "Old Fashioned"
+      ],
       "disponivel": true,
       "garrafa": {
         "formato": "redonda",
         "altura": 0.3,
-        "largura": 0.082,
-        "ombro": "medio",
+        "largura": 0.084,
+        "ombro": [
+          0.58,
+          0.71
+        ],
+        "raioGargalo": 0.0145,
+        "fundo": 0.03,
+        "capsula": {
+          "inicio": 0.79,
+          "cor": "#1c3128",
+          "metalica": false
+        },
         "corVidro": "#f4f1ea",
-        "corLiquido": "#9c4f14",
-        "corRotulo": "#efe4c8",
-        "corTextoRotulo": "#24382b",
-        "corTampa": "#1f3a2c"
+        "corLiquido": "#d0561c"
+      },
+      "rotulo": {
+        "estilo": "buffalo-trace",
+        "destaque": "#b4471b"
       }
     },
     {
@@ -47,20 +69,42 @@
       "teorAlcoolico": 45.2,
       "preco": 329.9,
       "descricao": "Bourbon small batch de destilação tripla em alambiques de cobre, combinado com destilado de coluna. Garrafa em formato de frasco, perfil rico e aveludado com especiarias e frutas secas.",
-      "notas": ["frutas secas", "cacau", "canela", "tabaco doce", "laranja"],
-      "harmonizacao": ["queijo cheddar maturado", "pato laqueado", "brownie", "Manhattan"],
+      "notas": [
+        "frutas secas",
+        "cacau",
+        "canela",
+        "tabaco doce",
+        "laranja"
+      ],
+      "harmonizacao": [
+        "queijo cheddar maturado",
+        "pato laqueado",
+        "brownie",
+        "Manhattan"
+      ],
       "disponivel": true,
       "garrafa": {
         "formato": "frasco",
-        "altura": 0.27,
-        "largura": 0.1,
-        "profundidade": 0.058,
-        "ombro": "alto",
-        "corVidro": "#f2eee6",
-        "corLiquido": "#8f4210",
-        "corRotulo": "#e9dcc0",
-        "corTextoRotulo": "#3a2414",
-        "corTampa": "#4a2a17"
+        "altura": 0.255,
+        "largura": 0.108,
+        "profundidade": 0.062,
+        "ombro": [
+          0.74,
+          0.83
+        ],
+        "raioGargalo": 0.0155,
+        "fundo": 0.03,
+        "capsula": {
+          "inicio": 0.8,
+          "cor": "#6b5040",
+          "metalica": false
+        },
+        "corVidro": "#f3f0e8",
+        "corLiquido": "#c8702a"
+      },
+      "rotulo": {
+        "estilo": "woodford-reserve",
+        "destaque": "#6b5040"
       }
     },
     {
@@ -76,19 +120,40 @@
       "teorAlcoolico": 40,
       "preco": 159.9,
       "descricao": "Whiskey do Tennessee filtrado gota a gota em carvão de bordo (Lincoln County Process) antes do envelhecimento. Suave, com doçura de caramelo e um toque defumado. Garrafa quadrada icônica.",
-      "notas": ["caramelo", "banana", "carvalho tostado", "baunilha"],
-      "harmonizacao": ["hambúrguer na brasa", "churrasco", "pipoca caramelizada", "Jack & Coke"],
+      "notas": [
+        "caramelo",
+        "banana",
+        "carvalho tostado",
+        "baunilha"
+      ],
+      "harmonizacao": [
+        "hambúrguer na brasa",
+        "churrasco",
+        "pipoca caramelizada",
+        "Jack & Coke"
+      ],
       "disponivel": true,
       "garrafa": {
         "formato": "quadrada",
-        "altura": 0.265,
-        "largura": 0.08,
-        "ombro": "alto",
+        "altura": 0.262,
+        "largura": 0.081,
+        "ombro": [
+          0.62,
+          0.74
+        ],
+        "raioGargalo": 0.0135,
+        "fundo": 0.03,
+        "capsula": {
+          "inicio": 0.86,
+          "cor": "#111111",
+          "metalica": false
+        },
         "corVidro": "#f3f1ec",
-        "corLiquido": "#a3521a",
-        "corRotulo": "#141414",
-        "corTextoRotulo": "#f2f2f2",
-        "corTampa": "#111111"
+        "corLiquido": "#e2691a"
+      },
+      "rotulo": {
+        "estilo": "jack-daniels",
+        "destaque": "#1a1a1a"
       }
     },
     {
@@ -104,19 +169,40 @@
       "teorAlcoolico": 40,
       "preco": 129.9,
       "descricao": "Blend irlandês de destilação tripla, combinando pot still e grain whiskey. Extremamente suave, com notas florais e de madeira tostada. Reconhecível pela garrafa de vidro verde.",
-      "notas": ["mel", "pera", "especiarias suaves", "nozes"],
-      "harmonizacao": ["peixe defumado", "fish and chips", "cheesecake", "Irish Coffee"],
+      "notas": [
+        "mel",
+        "pera",
+        "especiarias suaves",
+        "nozes"
+      ],
+      "harmonizacao": [
+        "peixe defumado",
+        "fish and chips",
+        "cheesecake",
+        "Irish Coffee"
+      ],
       "disponivel": true,
       "garrafa": {
         "formato": "redonda",
-        "altura": 0.29,
-        "largura": 0.084,
-        "ombro": "medio",
-        "corVidro": "#4f8a52",
-        "corLiquido": "#7a5a1c",
-        "corRotulo": "#f1ead6",
-        "corTextoRotulo": "#1d3b23",
-        "corTampa": "#173322"
+        "altura": 0.3,
+        "largura": 0.078,
+        "ombro": [
+          0.58,
+          0.72
+        ],
+        "raioGargalo": 0.0135,
+        "fundo": 0.03,
+        "capsula": {
+          "inicio": 0.8,
+          "cor": "#8a1a1c",
+          "metalica": false
+        },
+        "corVidro": "#3f6e32",
+        "corLiquido": "#c88a2a"
+      },
+      "rotulo": {
+        "estilo": "jameson",
+        "destaque": "#1e5a38"
       }
     },
     {
@@ -132,19 +218,40 @@
       "teorAlcoolico": 40,
       "preco": 169.9,
       "descricao": "Blend escocês com coração de maltes de Speyside, envelhecido no mínimo 12 anos. Cremoso e generoso, com mel, frutas maduras e avelã.",
-      "notas": ["mel", "maçã madura", "avelã", "baunilha"],
-      "harmonizacao": ["risoto de cogumelos", "queijo brie", "torta de maçã", "on the rocks"],
+      "notas": [
+        "mel",
+        "maçã madura",
+        "avelã",
+        "baunilha"
+      ],
+      "harmonizacao": [
+        "risoto de cogumelos",
+        "queijo brie",
+        "torta de maçã",
+        "on the rocks"
+      ],
       "disponivel": true,
       "garrafa": {
         "formato": "redonda",
-        "altura": 0.27,
+        "altura": 0.28,
         "largura": 0.092,
-        "ombro": "baixo",
+        "ombro": [
+          0.62,
+          0.75
+        ],
+        "raioGargalo": 0.0145,
+        "fundo": 0.03,
+        "capsula": {
+          "inicio": 0.79,
+          "cor": "#7a120b",
+          "metalica": false
+        },
         "corVidro": "#f3efe6",
-        "corLiquido": "#a8591c",
-        "corRotulo": "#e6dcc2",
-        "corTextoRotulo": "#6e1a1f",
-        "corTampa": "#b9b4a8"
+        "corLiquido": "#e39a1c"
+      },
+      "rotulo": {
+        "estilo": "chivas-regal",
+        "destaque": "#7a120b"
       }
     },
     {
@@ -160,20 +267,40 @@
       "teorAlcoolico": 40,
       "preco": 189.9,
       "descricao": "Blend de cerca de 40 whiskies de toda a Escócia, todos com no mínimo 12 anos. Equilíbrio entre frutas escuras, baunilha e a fumaça característica das ilhas. Garrafa quadrada com rótulo inclinado a 24°.",
-      "notas": ["fumaça suave", "frutas escuras", "baunilha", "laranja"],
-      "harmonizacao": ["carnes grelhadas", "salmão defumado", "chocolate meio amargo", "highball"],
+      "notas": [
+        "fumaça suave",
+        "frutas escuras",
+        "baunilha",
+        "laranja"
+      ],
+      "harmonizacao": [
+        "carnes grelhadas",
+        "salmão defumado",
+        "chocolate meio amargo",
+        "highball"
+      ],
       "disponivel": true,
       "garrafa": {
         "formato": "quadrada",
-        "altura": 0.275,
-        "largura": 0.079,
-        "ombro": "alto",
+        "altura": 0.29,
+        "largura": 0.08,
+        "ombro": [
+          0.78,
+          0.84
+        ],
+        "raioGargalo": 0.0145,
+        "fundo": 0.03,
+        "capsula": {
+          "inicio": 0.85,
+          "cor": "#141414",
+          "metalica": false
+        },
         "corVidro": "#f1eee8",
-        "corLiquido": "#97471a",
-        "corRotulo": "#121212",
-        "corTextoRotulo": "#d4af5a",
-        "corTampa": "#1a1a1a",
-        "inclinacaoRotulo": 24
+        "corLiquido": "#d4702e"
+      },
+      "rotulo": {
+        "estilo": "johnnie-walker-black",
+        "destaque": "#b38b3f"
       }
     },
     {
@@ -189,20 +316,41 @@
       "teorAlcoolico": 40,
       "preco": 89.9,
       "descricao": "Blend leve e acessível com mais de 40 maltes, com destaque para Miltonduff e Glenburgie. Delicado e doce, ideal para drinques e para quem está começando no universo do whisky.",
-      "notas": ["chocolate ao leite", "maçã vermelha", "baunilha", "mel"],
-      "harmonizacao": ["petiscos de boteco", "frango assado", "frutas frescas", "whisky sour"],
+      "notas": [
+        "chocolate ao leite",
+        "maçã vermelha",
+        "baunilha",
+        "mel"
+      ],
+      "harmonizacao": [
+        "petiscos de boteco",
+        "frango assado",
+        "frutas frescas",
+        "whisky sour"
+      ],
       "disponivel": true,
       "garrafa": {
         "formato": "quadrada",
-        "altura": 0.28,
-        "largura": 0.084,
-        "profundidade": 0.064,
-        "ombro": "medio",
+        "altura": 0.27,
+        "largura": 0.088,
+        "profundidade": 0.068,
+        "ombro": [
+          0.72,
+          0.81
+        ],
+        "raioGargalo": 0.0145,
+        "fundo": 0.03,
+        "capsula": {
+          "inicio": 0.86,
+          "cor": "#e5e3cf",
+          "metalica": false
+        },
         "corVidro": "#f2efe9",
-        "corLiquido": "#c0802e",
-        "corRotulo": "#f1ece0",
-        "corTextoRotulo": "#9b1b1f",
-        "corTampa": "#8d1c1f"
+        "corLiquido": "#b85522"
+      },
+      "rotulo": {
+        "estilo": "ballantines",
+        "destaque": "#1c2a4a"
       }
     },
     {
@@ -218,19 +366,41 @@
       "teorAlcoolico": 40,
       "preco": 649.9,
       "descricao": "Single malt maturado em barris de carvalho americano e europeu temperados com Jerez (sherry). Une a doçura do carvalho americano à riqueza de frutas secas do carvalho europeu.",
-      "notas": ["caramelo", "passas", "gengibre", "laranja cristalizada", "carvalho"],
-      "harmonizacao": ["queijo parmesão", "cordeiro", "tâmaras", "puro, com gota d'água"],
+      "notas": [
+        "caramelo",
+        "passas",
+        "gengibre",
+        "laranja cristalizada",
+        "carvalho"
+      ],
+      "harmonizacao": [
+        "queijo parmesão",
+        "cordeiro",
+        "tâmaras",
+        "puro, com gota d'água"
+      ],
       "disponivel": true,
       "garrafa": {
         "formato": "redonda",
-        "altura": 0.28,
-        "largura": 0.086,
-        "ombro": "baixo",
+        "altura": 0.3,
+        "largura": 0.084,
+        "ombro": [
+          0.6,
+          0.74
+        ],
+        "raioGargalo": 0.0145,
+        "fundo": 0.03,
+        "capsula": {
+          "inicio": 0.79,
+          "cor": "#222222",
+          "metalica": false
+        },
         "corVidro": "#f4f1ea",
-        "corLiquido": "#b0661f",
-        "corRotulo": "#f5f1e6",
-        "corTextoRotulo": "#6b4a1c",
-        "corTampa": "#2a1d14"
+        "corLiquido": "#d78a45"
+      },
+      "rotulo": {
+        "estilo": "macallan",
+        "destaque": "#8f1b22"
       }
     },
     {
@@ -246,19 +416,41 @@
       "teorAlcoolico": 40,
       "preco": 259.9,
       "descricao": "Single malt de Speyside finalizado em barris que envelheceram rum caribenho. Tropical e frutado, com doçura de açúcar mascavo e notas de fruta madura.",
-      "notas": ["banana", "manga", "açúcar mascavo", "baunilha", "toffee"],
-      "harmonizacao": ["camarão grelhado", "culinária caribenha", "abacaxi caramelizado", "highball com água de coco"],
+      "notas": [
+        "banana",
+        "manga",
+        "açúcar mascavo",
+        "baunilha",
+        "toffee"
+      ],
+      "harmonizacao": [
+        "camarão grelhado",
+        "culinária caribenha",
+        "abacaxi caramelizado",
+        "highball com água de coco"
+      ],
       "disponivel": true,
       "garrafa": {
         "formato": "redonda",
-        "altura": 0.3,
-        "largura": 0.08,
-        "ombro": "alto",
+        "altura": 0.31,
+        "largura": 0.079,
+        "ombro": [
+          0.62,
+          0.73
+        ],
+        "raioGargalo": 0.0135,
+        "fundo": 0.03,
+        "capsula": {
+          "inicio": 0.77,
+          "cor": "#c23c24",
+          "metalica": false
+        },
         "corVidro": "#f3f1ea",
-        "corLiquido": "#c4862f",
-        "corRotulo": "#e4efe9",
-        "corTextoRotulo": "#174d59",
-        "corTampa": "#1c3f4a"
+        "corLiquido": "#e8b24a"
+      },
+      "rotulo": {
+        "estilo": "glenlivet-caribbean",
+        "destaque": "#c23c24"
       }
     },
     {
@@ -274,19 +466,42 @@
       "teorAlcoolico": 43,
       "preco": 899.9,
       "descricao": "Blend japonês de maltes de Yamazaki e Hakushu com grain whisky de Chita, envelhecidos em cinco tipos de barril, incluindo o raro carvalho japonês Mizunara. Garrafa com 24 facetas que representam as 24 estações do calendário tradicional japonês.",
-      "notas": ["flor de laranjeira", "mel", "lichia", "chocolate branco", "Mizunara (sândalo)"],
-      "harmonizacao": ["sushi e sashimi", "tempurá", "frutas cítricas", "mizuwari"],
+      "notas": [
+        "flor de laranjeira",
+        "mel",
+        "lichia",
+        "chocolate branco",
+        "Mizunara (sândalo)"
+      ],
+      "harmonizacao": [
+        "sushi e sashimi",
+        "tempurá",
+        "frutas cítricas",
+        "mizuwari"
+      ],
       "disponivel": false,
       "garrafa": {
         "formato": "facetada",
-        "altura": 0.24,
-        "largura": 0.096,
-        "ombro": "alto",
+        "altura": 0.235,
+        "largura": 0.105,
+        "ombro": [
+          0.74,
+          0.83
+        ],
+        "raioGargalo": 0.017,
+        "fundo": 0.07,
+        "tampa": "rolha-vidro",
+        "capsula": {
+          "inicio": 0.8,
+          "cor": "#392614",
+          "metalica": false
+        },
         "corVidro": "#f5f3ee",
-        "corLiquido": "#c27c2c",
-        "corRotulo": "#f3efe6",
-        "corTextoRotulo": "#8a5a1a",
-        "corTampa": "#b48a3c"
+        "corLiquido": "#f0a01a"
+      },
+      "rotulo": {
+        "estilo": "hibiki",
+        "destaque": "#b07a2a"
       }
     }
   ]

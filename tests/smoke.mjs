@@ -46,7 +46,7 @@ try {
     await sleep(300);
   };
 
-  await page.goto(url);
+  await page.goto(`${url}?quality=high`);
   await page.waitForFunction(() => window.__gondola?.ready, null, { timeout: 120_000 });
   await settle();
 
@@ -101,7 +101,22 @@ try {
   });
   await page.click('#reset-view');
   await settle();
+  await sleep(800);
   await page.screenshot({ path: path.join(shots, '04-iluminacao-led.png') });
+
+  // US1 (002): vista de comparação das 10 garrafas, em 2× e recortada nas garrafas
+  const lineup = await browser.newPage({ viewport: { width: 1440, height: 560 }, deviceScaleFactor: 2 });
+  lineup.setDefaultTimeout(240_000);
+  lineup.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
+  lineup.on('pageerror', (err) => errors.push(err.message));
+  await lineup.goto(`${url}?lineup&quality=high`);
+  await lineup.waitForFunction(() => window.__gondola?.ready);
+  await sleep(500);
+  await lineup.waitForFunction(() => window.__gondola.isIdle(), null, { polling: 500 });
+  await sleep(1200);
+  await lineup.screenshot({ path: path.join(shots, '05-comparacao-garrafas.png'), clip: { x: 0, y: 110, width: 1440, height: 330 } });
+  const calls = await lineup.evaluate(() => window.__gondola.renderer.info.render.calls);
+  console.log('draw calls na comparação:', calls);
 
   if (errors.length) throw new Error(`erros no console:\n${errors.join('\n')}`);
   console.log('OK — capturas em docs/screenshots/');

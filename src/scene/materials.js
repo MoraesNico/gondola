@@ -1,8 +1,11 @@
 // Materiais PBR com texturas fotorrealistas do Poly Haven (CC0).
 // Cada conjunto tem: diff (cor, sRGB), nor_gl (normal map, convenção OpenGL) e arm
 // (AO no R, roughness no G, metalness no B — os canais que o three.js lê).
+// Formato preferido: KTX2 (Basis Universal), que continua comprimido na memória da GPU
+// (dica 22 do guia: 4–8× menos VRAM). Se o transcodificador falhar, cai para o JPG.
 
 import * as THREE from 'three';
+import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 
 const TEXTURE_ROOT = 'assets/textures';
 
@@ -15,20 +18,30 @@ const SETS = {
   wall: { id: 'painted_plaster_wall', metersPerTile: 2.5, fallback: '#b9b1a5' },
 };
 
-async function loadSet(loader, { id }, maxAnisotropy) {
-  const load = (name, colorSpace) =>
-    loader
-      .loadAsync(`${TEXTURE_ROOT}/${id}/${name}.jpg`)
-      .then((tex) => {
-        tex.colorSpace = colorSpace;
-        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.anisotropy = Math.min(8, maxAnisotropy);
-        return tex;
-      })
-      .catch((err) => {
-        console.warn(`[materiais] falha ao carregar ${id}/${name}.jpg — usando cor sólida`, err);
-        return null;
-      });
+function prepare(tex, colorSpace, maxAnisotropy) {
+  tex.colorSpace = colorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = Math.min(8, maxAnisotropy);
+  return tex;
+}
+
+async function loadSet(loaders, { id }, maxAnisotropy) {
+  const load = async (name, colorSpace) => {
+    const base = `${TEXTURE_ROOT}/${id}/${name}`;
+    if (loaders.ktx2) {
+      try {
+        return prepare(await loaders.ktx2.loadAsync(`${base}.ktx2`), colorSpace, maxAnisotropy);
+      } catch (err) {
+        console.warn(`[materiais] KTX2 indisponível para ${id}/${name} — usando JPG`, err);
+      }
+    }
+    try {
+      return prepare(await loaders.jpg.loadAsync(`${base}.jpg`), colorSpace, maxAnisotropy);
+    } catch (err) {
+      console.warn(`[materiais] falha ao carregar ${id}/${name} — usando cor sólida`, err);
+      return null;
+    }
+  };
   const [map, normalMap, arm] = await Promise.all([
     load('diff', THREE.SRGBColorSpace), // só cor em sRGB…
     load('nor_gl', THREE.NoColorSpace), // …mapas de dados ficam lineares
@@ -65,10 +78,19 @@ function texturesFor(textures, key, { scale = 1, use = ['map', 'normalMap', 'arm
   return out;
 }
 
-export async function createMaterials(renderer, manager) {
-  const loader = new THREE.TextureLoader(manager);
+// `?textures=jpg` força os JPG (útil para comparar memória e qualidade).
+export async function createMaterials(renderer, manager, { preferKtx2 = true } = {}) {
+  const loaders = { jpg: new THREE.TextureLoader(manager), ktx2: null };
+  if (preferKtx2) {
+    try {
+      loaders.ktx2 = new KTX2Loader(manager).setTranscoderPath('vendor/three/addons/libs/basis/').detectSupport(renderer);
+    } catch (err) {
+      console.warn('[materiais] KTX2Loader indisponível — usando JPG', err);
+    }
+  }
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
-  const entries = await Promise.all(Object.entries(SETS).map(async ([k, def]) => [k, await loadSet(loader, def, maxAniso)]));
+  const entries = await Promise.all(Object.entries(SETS).map(async ([k, def]) => [k, await loadSet(loaders, def, maxAniso)]));
+  loaders.ktx2?.dispose(); // encerra os workers do transcodificador (dica 37)
   const textures = Object.fromEntries(entries);
   const has = (k) => Boolean(textures[k].map);
 
@@ -117,7 +139,7 @@ export async function createMaterials(renderer, manager) {
 
   const wall = new THREE.MeshStandardMaterial({
     name: 'reboco',
-    color: has('wall') ? '#e9dfd2' : SETS.wall.fallback,
+    color: has('wall') ? '#ead3b8' : SETS.wall.fallback, // reboco em tom quente
     roughness: 1,
     metalness: 0,
     ...texturesFor(textures, 'wall'),

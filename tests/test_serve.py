@@ -43,10 +43,20 @@ class ServeTest(unittest.TestCase):
         self.assertIn("application/json", headers["Content-Type"])
         self.assertEqual(len(json.loads(body)["produtos"]), 10)
 
-    def test_hdr_and_no_cache(self):
+    def test_hdr_and_asset_cache(self):
         _, headers, _ = self.get("/assets/hdri/brown_photostudio_02_1k.hdr")
         self.assertEqual(headers["Content-Type"], "application/octet-stream")
+        self.assertEqual(headers["Cache-Control"], "no-cache")  # revalida (304)
+
+    def test_catalog_never_cached(self):
+        _, headers, _ = self.get("/data/whiskies.json?v=1")
         self.assertEqual(headers["Cache-Control"], "no-store")
+
+    def test_ktx2_and_font_mime(self):
+        _, headers, _ = self.get("/assets/textures/marble_01/diff.ktx2")
+        self.assertEqual(headers["Content-Type"], "image/ktx2")
+        _, headers, _ = self.get("/assets/fonts/rye-normal-400.woff2")
+        self.assertEqual(headers["Content-Type"], "font/woff2")
 
 
 if __name__ == "__main__":

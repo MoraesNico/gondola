@@ -1,31 +1,32 @@
 // Renderer, câmera, controles e loop de quadros.
-// Renderiza sob demanda (dica "renderize só quando algo muda"): o loop só desenha quando a
-// câmera se moveu, há animação ativa ou alguém chamou requestRender().
+// - Renderiza sob demanda: só desenha quando a câmera se moveu, há animação ou alguém chamou
+//   requestRender() (dica 64).
+// - Qualidade adaptativa (dicas 68/80): mede o tempo de quadro enquanto anima e ajusta pixel
+//   ratio, sombra e resolução da transmissão (src/core/quality.js).
+// - Perda de contexto WebGL tratada (dica 98).
 
 import * as THREE from 'three';
 import CameraControls from 'camera-controls';
+import { QUALITY_TIERS, createQualityController } from '../core/quality.js';
 
 CameraControls.install({ THREE });
 
-export function createRenderer(canvas) {
+export function createRenderer(canvas, { quality = null, onContextLost = () => {} } = {}) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true, // MSAA nativo é mais barato que AA em pós-processamento (dicas)
+    antialias: true, // MSAA nativo (sem pós-processamento)
     alpha: false,
     stencil: false,
     powerPreference: 'high-performance',
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap; // PCFSoftShadowMap foi removido no r186
-  renderer.shadowMap.autoUpdate = false; // atualizado só quando a cena muda
-  renderer.shadowMap.needsUpdate = true;
+  renderer.shadowMap.autoUpdate = true; // quem decide é cada luz (shadow.autoUpdate = false)
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#17120e');
+  scene.background = new THREE.Color('#1a120c');
 
   const camera = new THREE.PerspectiveCamera(38, 1, 0.05, 30);
   camera.position.set(1.2, 1.5, 4.2);
@@ -45,11 +46,22 @@ export function createRenderer(canvas) {
   const timer = new THREE.Timer();
   timer.connect(document); // pausa o delta quando a aba fica oculta
   const tickers = new Set();
+  const tierListeners = new Set();
   let dirty = true;
   let idle = false;
+  let lastFrameMs = 0;
 
   const requestRender = () => (dirty = true);
   controls.addEventListener('update', requestRender);
+
+  // ---------- qualidade ----------
+  const qc = createQualityController({ start: quality ?? 'alta', locked: Boolean(quality) });
+  function applyTier(tier) {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, tier.pixelRatio));
+    renderer.transmissionResolutionScale = tier.transmissionScale; // vidro fino: meia resolução basta
+    resize();
+    tierListeners.forEach((fn) => fn(tier));
+  }
 
   function resize() {
     const { clientWidth: w, clientHeight: h } = canvas.parentElement;
@@ -60,18 +72,39 @@ export function createRenderer(canvas) {
     requestRender();
   }
   new ResizeObserver(resize).observe(canvas.parentElement);
-  resize();
+  applyTier(qc.tier);
 
-  renderer.setAnimationLoop((time) => {
+  // ---------- loop ----------
+  let running = true;
+  function frame(time) {
     timer.update(time);
     const dt = Math.min(timer.getDelta(), 0.1);
     let animating = controls.update(dt);
     for (const tick of tickers) animating = tick(dt) || animating;
     if (animating || dirty) {
+      const t0 = performance.now();
       renderer.render(scene, camera);
+      lastFrameMs = performance.now() - t0;
       dirty = false;
+      // Só quadros em sequência (animação/câmera) dizem algo sobre o desempenho.
+      if (animating) {
+        const changed = qc.sample(timer.getDelta() * 1000 || lastFrameMs);
+        if (changed) applyTier(qc.tier);
+      }
     }
     idle = !animating;
+  }
+  renderer.setAnimationLoop(frame);
+
+  canvas.addEventListener('webglcontextlost', (ev) => {
+    ev.preventDefault(); // permite a restauração
+    running = false;
+    renderer.setAnimationLoop(null);
+    onContextLost();
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    // Recarregar é o caminho mais seguro: texturas comprimidas e canvases precisam ser reenviados.
+    if (!running) window.location.reload();
   });
 
   return {
@@ -82,7 +115,12 @@ export function createRenderer(canvas) {
     requestRender,
     // tick(dt) => boolean (true enquanto houver animação)
     addTicker: (fn) => tickers.add(fn),
-    // true quando câmera e animações pararam (usado pelo smoke test)
+    onTier: (fn) => (tierListeners.add(fn), fn(qc.tier)),
+    get tier() { return qc.tier; },
+    get qualityLocked() { return qc.locked; },
+    get lastFrameMs() { return lastFrameMs; },
+    // true quando câmera e animações pararam (usado pelos testes)
     isIdle: () => idle && !dirty,
+    tiers: QUALITY_TIERS,
   };
 }

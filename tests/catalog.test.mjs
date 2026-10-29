@@ -69,9 +69,64 @@ test('completa a garrafa com defaults e corrige formato desconhecido', () => {
     product({ id: 'a' }),
     product({ id: 'b', garrafa: { formato: 'triangular', altura: 0.25 } }),
   ]));
-  assert.deepEqual(produtos[0].garrafa, { ...BOTTLE_DEFAULTS, profundidade: BOTTLE_DEFAULTS.largura });
+  const g = produtos[0].garrafa;
+  assert.equal(g.formato, BOTTLE_DEFAULTS.formato);
+  assert.equal(g.profundidade, g.largura);
+  assert.deepEqual(g.ombro, [0.6, 0.74]);
+  assert.equal(g.tampa, 'capsula');
   assert.equal(produtos[1].garrafa.formato, 'redonda');
   assert.equal(produtos[1].garrafa.altura, 0.25);
+});
+
+test('ombro aceita enum ou [início, fim] e rejeita intervalo inválido', () => {
+  const { produtos } = parseCatalog(wrap([
+    product({ id: 'a', garrafa: { ombro: 'alto' } }),
+    product({ id: 'b', garrafa: { ombro: [0.55, 0.7] } }),
+    product({ id: 'c', garrafa: { ombro: [0.8, 0.7] } }),
+    product({ id: 'd', garrafa: { ombro: [0.1, 0.99] } }),
+  ]));
+  assert.deepEqual(produtos[0].garrafa.ombro, [0.7, 0.8]);
+  assert.deepEqual(produtos[1].garrafa.ombro, [0.55, 0.7]);
+  assert.deepEqual(produtos[2].garrafa.ombro, [0.6, 0.74], 'fim ≤ início → padrão');
+  assert.deepEqual(produtos[3].garrafa.ombro, [0.4, 0.9], 'fora da faixa → limitado');
+});
+
+test('gargalo, fundo, tampa e cápsula são normalizados', () => {
+  const { produtos } = parseCatalog(wrap([
+    product({ id: 'a', garrafa: { raioGargalo: 0.5, fundo: -1, tampa: 'rolha-vidro', capsula: { inicio: 0.3, cor: '#ABCDEF', metalica: 1 } } }),
+    product({ id: 'b', garrafa: { corTampa: '#123456' } }),
+  ]));
+  const a = produtos[0].garrafa;
+  assert.equal(a.raioGargalo, 0.025);
+  assert.equal(a.fundo, 0.005);
+  assert.equal(a.tampa, 'rolha-vidro');
+  assert.deepEqual(a.capsula, { inicio: 0.6, cor: '#ABCDEF', metalica: false });
+  assert.equal(produtos[1].garrafa.capsula.cor, '#123456', 'corTampa legado vira cor da cápsula');
+});
+
+test('rótulo: estilo, destaque e textos', () => {
+  const { produtos } = parseCatalog(wrap([
+    product({ id: 'a', rotulo: { estilo: 'jameson', destaque: '#1e5a38', textos: { linha: 'ok', n: 3, vazio: '' } } }),
+    product({ id: 'b', garrafa: { corLiquido: '#aa5500' } }),
+    product({ id: 'c', rotulo: { estilo: 'Estilo Inválido!', destaque: 'verde' } }),
+  ]));
+  assert.deepEqual(produtos[0].rotulo, { estilo: 'jameson', destaque: '#1e5a38', textos: { linha: 'ok' } });
+  assert.deepEqual(produtos[1].rotulo, { estilo: 'generico', destaque: '#aa5500', textos: {} });
+  assert.equal(produtos[2].rotulo.estilo, 'generico');
+});
+
+test('catálogo real: cada whisky tem estilo de rótulo próprio e cápsula no gargalo', async () => {
+  const raw = JSON.parse(await readFile(new URL('../data/whiskies.json', import.meta.url), 'utf8'));
+  const { produtos } = parseCatalog(raw);
+  const estilos = new Set(produtos.map((p) => p.rotulo.estilo));
+  assert.equal(estilos.size, 10);
+  assert.ok(!estilos.has('generico'));
+  for (const p of produtos) {
+    assert.ok(p.garrafa.ombro[0] < p.garrafa.ombro[1], p.id);
+    assert.ok(p.garrafa.capsula.inicio > p.garrafa.ombro[0], `${p.id}: cápsula acima do ombro`);
+  }
+  assert.equal(produtos.find((p) => p.id === 'hibiki-harmony').garrafa.tampa, 'rolha-vidro');
+  assert.equal(produtos.find((p) => p.id === 'jameson').garrafa.corVidro, '#3f6e32');
 });
 
 test('normaliza listas opcionais e moeda', () => {

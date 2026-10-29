@@ -1,9 +1,10 @@
-// Iluminação física da cena com sombras via shadow map.
-// - Luz principal (SpotLight, sombra 2048²): simula o spot de trilho do teto da loja.
-// - Preenchimento (DirectionalLight, sombra 1024²): luz geral fria vinda da esquerda.
-// - Hemisférica fraca: rebatimento do piso/teto.
-// As fitas LED de cada prateleira vivem em gondola.js (RectAreaLight + faixa emissiva).
-// Nenhuma luz é adicionada/removida depois de criada: só muda intensidade (sem recompilar shaders).
+// Iluminação quente de adega (≈ 2700–3000 K) com sombras via shadow map.
+// - Luz principal (SpotLight, sombra 2048²): spot de trilho do teto, âmbar suave.
+// - Preenchimento (DirectionalLight): luz geral quente vinda da esquerda; SEM sombra por padrão
+//   (dica 53/58: cada luz com sombra é um passe inteiro a mais) — pode ser ligada no painel.
+// - Hemisférica: rebatimento quente do piso de mármore e do teto.
+// As fitas LED de cada prateleira vivem em gondola.js (lightmaps assados ou RectAreaLight).
+// Sombras atualizam só quando algo muda (dica 61: shadow.autoUpdate = false por luz).
 
 import * as THREE from 'three';
 
@@ -16,14 +17,14 @@ export const TONE_MAPPINGS = {
 
 export function createLighting({ scene, renderer }) {
   const params = {
-    key: { on: true, intensity: 42, color: '#fff0dc', angle: 36, penumbra: 0.6, x: 1.7, y: 3.3, z: 2.9 },
-    fill: { on: true, intensity: 0.7, color: '#d6e2ff' },
-    hemi: { intensity: 0.35 },
-    led: { on: true, intensity: 9, color: '#ffd7a0' },
+    key: { on: true, intensity: 46, color: '#ffd2a1', angle: 34, penumbra: 0.65, x: 1.5, y: 3.3, z: 2.8 }, // ~2900 K
+    fill: { on: true, intensity: 0.55, color: '#ffe3c4', shadow: false }, // ~3500 K
+    hemi: { intensity: 0.32, sky: '#ffe9d2', ground: '#5a3a22' },
+    led: { on: true, intensity: 9, color: '#ffc68c', mode: 'assado' }, // ~2900 K
     shadows: { enabled: true, type: 'PCF', mapSize: 2048, radius: 4, bias: -0.0004, normalBias: 0.018, helper: false },
-    exposure: 1.0,
+    exposure: 1.05,
     toneMapping: 'ACES',
-    envIntensity: 0.45,
+    envIntensity: 0.32,
   };
 
   const target = new THREE.Object3D();
@@ -35,28 +36,42 @@ export function createLighting({ scene, renderer }) {
   key.decay = 2;
   key.target = target;
   key.castShadow = true;
-  key.shadow.camera.near = 1;
-  key.shadow.camera.far = 9;
+  key.shadow.autoUpdate = false;
+  key.shadow.camera.near = 2; // frustum justo (dica 60): a luz está a ~4 m da gôndola
+  key.shadow.camera.far = 7;
   scene.add(key);
 
   const fill = new THREE.DirectionalLight(params.fill.color, params.fill.intensity);
   fill.name = 'preenchimento';
   fill.position.set(-3.2, 4.2, 3.4);
   fill.target = target;
-  fill.castShadow = true;
+  fill.shadow.autoUpdate = false;
   fill.shadow.mapSize.set(1024, 1024);
-  Object.assign(fill.shadow.camera, { left: -2.4, right: 2.4, top: 2.8, bottom: -1.6, near: 0.5, far: 12 });
   fill.shadow.bias = -0.0006;
   fill.shadow.normalBias = 0.02;
   scene.add(fill);
 
-  const hemi = new THREE.HemisphereLight('#fff6ea', '#3a2a1e', params.hemi.intensity);
+  const hemi = new THREE.HemisphereLight(params.hemi.sky, params.hemi.ground, params.hemi.intensity);
   hemi.name = 'hemisferica';
   scene.add(hemi);
 
   const shadowHelper = new THREE.CameraHelper(key.shadow.camera); // dica: visualize o frustum da sombra
   shadowHelper.visible = false;
   scene.add(shadowHelper);
+
+  // Pede um novo mapa de sombra às luzes que projetam (chamado em rearranjo/ajuste de luz).
+  function invalidateShadows() {
+    key.shadow.needsUpdate = true;
+    fill.shadow.needsUpdate = true;
+  }
+
+  // Ajusta o frustum ortográfico do preenchimento à largura atual da gôndola.
+  function fitToWidth(width) {
+    const half = width / 2 + 0.6;
+    Object.assign(fill.shadow.camera, { left: -half, right: half, top: 2.8, bottom: -1.4 });
+    fill.shadow.camera.updateProjectionMatrix();
+    invalidateShadows();
+  }
 
   function apply() {
     const k = params.key;
@@ -72,10 +87,12 @@ export function createLighting({ scene, renderer }) {
 
     const s = params.shadows;
     const type = SHADOW_TYPES[s.type];
-    if (renderer.shadowMap.type !== type || renderer.shadowMap.enabled !== s.enabled) {
+    const fillShadow = s.enabled && params.fill.shadow;
+    if (renderer.shadowMap.type !== type || renderer.shadowMap.enabled !== s.enabled || fill.castShadow !== fillShadow) {
       renderer.shadowMap.type = type;
       renderer.shadowMap.enabled = s.enabled;
-      scene.traverse((o) => o.material && ([].concat(o.material).forEach((m) => (m.needsUpdate = true))));
+      fill.castShadow = fillShadow;
+      scene.traverse((o) => o.material && [].concat(o.material).forEach((m) => (m.needsUpdate = true)));
     }
     if (key.shadow.mapSize.x !== s.mapSize) {
       key.shadow.mapSize.set(s.mapSize, s.mapSize);
@@ -96,9 +113,9 @@ export function createLighting({ scene, renderer }) {
     renderer.toneMappingExposure = params.exposure;
     renderer.toneMapping = TONE_MAPPINGS[params.toneMapping];
     scene.environmentIntensity = params.envIntensity;
-    renderer.shadowMap.needsUpdate = true;
+    invalidateShadows();
   }
 
   apply();
-  return { params, key, fill, hemi, apply };
+  return { params, key, fill, hemi, apply, invalidateShadows, fitToWidth };
 }

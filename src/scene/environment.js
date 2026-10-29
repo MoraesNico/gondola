@@ -5,19 +5,26 @@ import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 
 export const ROOM = Object.freeze({ wallZ: -0.62, width: 9, height: 3.6, depth: 8 });
 
-export async function createEnvironment({ renderer, scene, materials, manager }) {
+// Baixa o HDRI e gera o mapa de ambiente filtrado (PMREM). Roda em paralelo às texturas.
+export async function loadEnvironmentMap(renderer, manager) {
   const pmrem = new THREE.PMREMGenerator(renderer);
   try {
     const hdr = await new HDRLoader(manager).loadAsync('assets/hdri/brown_photostudio_02_1k.hdr');
     hdr.mapping = THREE.EquirectangularReflectionMapping;
-    scene.environment = pmrem.fromEquirectangular(hdr).texture;
+    const env = pmrem.fromEquirectangular(hdr).texture;
     hdr.dispose(); // o PMREM já guardou a versão filtrada
+    return env;
   } catch (err) {
     console.warn('[ambiente] HDRI indisponível — seguindo sem reflexos de ambiente', err);
+    return null;
   } finally {
     pmrem.dispose();
   }
-  scene.environmentIntensity = 0.45;
+}
+
+export function createEnvironment({ scene, materials, envMap }) {
+  scene.environment = envMap;
+  scene.environmentIntensity = 0.32;
 
   const group = new THREE.Group();
   group.name = 'loja';
